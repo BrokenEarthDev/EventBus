@@ -1,6 +1,9 @@
 ## What is EventBus?
 EventBus is an api that allows creating events easier.
 
+## How can I get the EventBus?
+To get the event bus, go to the <a href="https://github.com/BrokenEarthDev/EventBus/releases/tag/v1.0">releases section</a>
+
 ## What are some Examples?
 To create an EventBus object, 
 
@@ -87,8 +90,3 @@ There are several methods that does that in the **EventBusOptions** class
 1 - getRestrictedClass: gets the restricted class. If there aren't any, it would return null.
 
 2 - getRestrictedAnnotation: gets the restricted annotation. If there aren't any, it would return null.
-
-
-### How can I report bugs or errors?
-
-You can report bugs or errors at the <a href="https://github.com/BrokenEarthDev/EventBus/issues">issue tracker</a>
