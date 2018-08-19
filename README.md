@@ -2,17 +2,18 @@
 EventBus is an api that allows creating events easier.
 
 ## How can I get the EventBus?
-To get the event bus, go to the <a href="https://github.com/BrokenEarthDev/EventBus/releases/tag/v1.0">releases section</a>
+To get the latest event bus, go to the <a href="https://github.com/BrokenEarthDev/EventBus/releases/tag/v2.0">releases section</a>
+
+> ## EventBus is now updated!
+EventBus is now updated to version 2.0
 
 ## What are some Examples?
 To create an EventBus object, 
 
 ```java
-EventBus<Event, Listener> e = new EventBusBuilder<>();
+EventBus<Event> e = new EventBusBuilder<>();
 ```
 For **Event**: You can create an Event class and use it as you saw in the type parameters. I recommend you to make other "sub" events to inherit from that event.
-
-For **Listener**: You can create an Event listener that all event classes need to inherit. If you don't want to create an event listener, then use **Object**
 
 ### Registering an event
 
@@ -20,22 +21,22 @@ For **Listener**: You can create an Event listener that all event classes need t
 e.register(new HiEventListenerClass);
 ```
 
-### Trigerring an event. You can trigger events when a certain condition is met
+### Calling an event
 
 ```java
-public class Test extends Listener {
+public class Test {
 
-  private static EventBus<Event, Listener> e = new EventBusBuilder();
+  private static EventBus<Event> e = new EventBusBuilder();
   
   private static Test instance = new Test();
   
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     e.register(instance);
     if (isWhatever()) {
-      e.trigger(new Event());
+      e.callEvent(new Event());
     }
   }
-  
+  @SubscribeEvent
   public void eventListener(Event e) {
     System.out.println(true);
   }
@@ -46,8 +47,41 @@ public class Test extends Listener {
 }
 ```
 
-## Can I restrict event listeners?
+## Can I exclude methods or listeners?
+Yes, you can. Using the **@ExcludeListener** annotation to exclude a registered listener and the **@ExcludeMethod** annotation to exclude an event method
 
+## Can I cancel events?
+As long as the event you want to cancel is cancellable, you can.
+To make an event **cancellable**, annotate the event class with **@CancellableEvent**.
+To cancel a cancellable event:
+```java
+eventbus.cancelEvent(Event.class)
+```
+Cancelling an event will also cancel all event subclasses of the event class
+To uncancel an event:
+```java
+eventbus.unCancelEvent(Event.class);
+```
+uncancelling an event will also uncancel all event subclasses of the event class
+
+## Can I delay an event?
+Yes, you can, too. To make an event run delayed, annotate the event class with
+```java
+@DelayedEvent(millis)
+```
+The value in the delayed event will be in millis.
+
+## Default options
+In EventBus, there are several default options and you can edit them.
+To get the default options, use
+```java
+eventbusobject.getDefaultOptions();
+```
+The code above will get the default options for all EventBusses.
+**By default, EventBus is restricted to __@SubscribeEvent__, meaning that you need to annotate
+@SubscribeEvent over the event methods.**
+
+## Can I restrict event listeners?
 Yes - you can! Using the ```EventBusOptions```. To get the EventBusOptions use
 ```java
 e.getOptions();
@@ -90,3 +124,8 @@ There are several methods that does that in the **EventBusOptions** class
 1 - getRestrictedClass: gets the restricted class. If there aren't any, it would return null.
 
 2 - getRestrictedAnnotation: gets the restricted annotation. If there aren't any, it would return null.
+
+
+### How can I report bugs or errors?
+
+You can report bugs or errors at the <a href="https://github.com/BrokenEarthDev/EventBus/issues">issue tracker</a>
