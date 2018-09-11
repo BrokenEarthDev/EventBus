@@ -3,7 +3,7 @@ EventBus is an api that allows creating events easier.
 
 > ## EventBus is now updated!
 > EventBus is now updated to 4.0
-> To get the lastest EventBus, go to the <a href="">releases section in github</a>
+> To get the lastest EventBus, go to the <a href="https://github.com/BrokenEarthDev/EventBus/releases/tag/4.0">releases section in github</a>
 
 ## Using the EventBus
 
