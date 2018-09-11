@@ -1,131 +1,205 @@
-## What is EventBus?
 EventBus is an api that allows creating events easier.
 
-## How can I get the EventBus?
-To get the latest event bus, go to the <a href="https://github.com/BrokenEarthDev/EventBus/releases/tag/v2.0">releases section</a>
 
 > ## EventBus is now updated!
-EventBus is now updated to version 2.0
+> EventBus is now updated to 4.0
+> To get the lastest EventBus, go to the <a href="">releases section in github</a>
 
-## What are some Examples?
-To create an EventBus object, 
+## Using the EventBus
+
+### Creating an instance
+
+> The EventBus is supposed to have the main event class specified in the "T" generic<br>
+> The main event class is a class that all other event classes will inherit from<br>
 
 ```java
-EventBus<Event> e = new EventBusBuilder<>();
+public static final EventBus<Event> EVENT_BUS = new EventBus<>();
 ```
-For **Event**: You can create an Event class and use it as you saw in the type parameters. I recommend you to make other "sub" events to inherit from that event.
 
-### Registering an event
+### Understanding listeners and event methods
+
+An **event method** is a method with certain unique characterists that will be called when a certain
+event is called using:
 
 ```java
-e.register(new HiEventListenerClass);
+EVENT_BUS.callEvent(eventObject);
+```
+
+For a method to be an event method, they must have certain characteristics:
+
+<ul>
+   <li>The method is annotated with the specified event annotation</li>
+   <li>The method is public and not static</li>
+   <li>They only have one parameter</li>
+   <li>That one parameter is requiring an event object. If you call that event
+    (or any event that is a subclass of the specified event), that method will run</li>
+</ul>
+
+> An event annotation is an annotation in which a method would to annotated by it to have one of
+> the characteristics of an event method.
+> The default event annotation is **SubscribeEvent**. You can set the event annotation when you initialize
+> the EventBus by using the constructor that requires Class<?> as their parameter
+
+An **event listener** is a class that contains **0 or more event methods**.
+
+### Registering and unregistering an event listener
+
+> An event listener is a class that contains 0 or more event method.
+
+By registering an event listener, methods within the event listener might be called when a **certain**
+event is called
+
+To register an event listener:
+
+```java
+EVENT_BUS.register(listenerObject);
+```
+
+You can also register multiple event listeners on one line:
+
+```java
+EVENT_BUS.register(listenerObject1, listenerObject2, listenerObject3, ...);
+```
+
+> Unregistering an event listener won't have its event methods called when a certain event is called
+
+To unregister an event listener
+
+```java
+EVENT_BUS.unregister(listenerObject);
+```
+
+You can also unregister multiple event listeners on one line:
+
+```java
+EVENT_BUS,unregister(listenerObject1, listenerObject2, listenerObject3, ...);
 ```
 
 ### Calling an event
 
-```java
-public class Test {
+By calling an event, event methods are searched and called if they have their parameter requiring an
+object equal to the event called or their parameter requiring an object that is a superclass (or above) 
+of the called event.
 
-  private static EventBus<Event> e = new EventBusBuilder();
-  
-  private static Test instance = new Test();
-  
-  public static void main(String[] args) {
-    e.register(instance);
-    if (isWhatever()) {
-      e.callEvent(new Event());
-    }
-  }
-  @SubscribeEvent
-  public void eventListener(Event e) {
-    System.out.println(true);
-  }
-  
-  private static boolean isWhatever() {
-    return true;
-  }
-}
+To call an event:
+
+```java
+EVENT_BUS.callEvent(eventObject);
 ```
 
-## Can I exclude methods or listeners?
-Yes, you can. Using the **@ExcludeListener** annotation to exclude a registered listener and the **@ExcludeMethod** annotation to exclude an event method
+> Any method requiring an event object the same as the one specified in the EventBus generic as their parameter will always be called
+> since it is a superclass of all events
 
-## Can I cancel events?
-As long as the event you want to cancel is cancellable, you can.
-To make an event **cancellable**, annotate the event class with **@CancellableEvent**.
-To cancel a cancellable event:
+### Cancelling and uncancelling events
+
+To cancel an event, the event should be **CANCELLABLE**
+
+To make an event cancellable (can be cancelled), annotate the event class with **CancellableEvent**
+
+By cancelling an event, that event (and their subclasses) won't get called when the EventBus calls it.
+
+To cancel an event:
+
 ```java
-eventbus.cancelEvent(Event.class)
+EVENT_BUS.cancelEvent(DesiredEvent.class);
 ```
-Cancelling an event will also cancel all event subclasses of the event class
+
 To uncancel an event:
-```java
-eventbus.unCancelEvent(Event.class);
-```
-uncancelling an event will also uncancel all event subclasses of the event class
-
-## Can I delay an event?
-Yes, you can, too. To make an event run delayed, annotate the event class with
-```java
-@DelayedEvent(millis)
-```
-The value in the delayed event will be in millis.
-
-## Default options
-In EventBus, there are several default options and you can edit them.
-To get the default options, use
-```java
-eventbusobject.getDefaultOptions();
-```
-The code above will get the default options for all EventBusses.
-**By default, EventBus is restricted to __@SubscribeEvent__, meaning that you need to annotate
-@SubscribeEvent over the event methods.**
-
-## Can I restrict event listeners?
-Yes - you can! Using the ```EventBusOptions```. To get the EventBusOptions use
-```java
-e.getOptions();
-```
-
-**e.getOptions()** will return the **EventBusOptions**. 
-
-## How can I?
-
-There are several methods in **EventBusOptions**. For example, If you want to restrictToAnnoation (make only event methods run if they have a specified annotations), you can use 
-```java
- e.getOptions().setRestrictedToAnnotation(YourDesiredAnnotation.class);
-```
-
-And now, the previous event listener example won't get `true` to be printed out.
-To make it run, annotate the method with `YourDesiredAnnotation`
-
-Another method called **setRestrictedToClass** will make only event methods run in a specified class.
-For example
 
 ```java
-e.getOptions().setRestrictedToClass(DesiredClass.class);
+EVENT_BUS.uncancelEvent(DesiredEvent.class);
 ```
-And finally, there is another method called **setUnrestricted** that will make all event methods run. By default the EventBus is **unrestricted**
 
-## How can I check if an EventBus is unrestricted, restricted to annotation, or restricted to class ?
+To check if an event class is cancellable:
 
-There are several booleans in the **EventBusOptions** class
+```java
+boolean isCancellable = EVENT_BUS.isCancellable(DesiredEvent.class);
+```
 
-1 - isRestrictedToClass: returns whether if the **EventBus** is restricted to class
+To check if an event is cancelled:
 
-2 - isUnRestricted: returns whether if the **EventBus** is unrestricted. **NOTE**: By default, EventBusses are **unrestricted**
+```java
+boolean isCancelled = EVENT_BUS.isCancelled(DesiredEvent.class);
+```
 
-3 - isRestrictedToAnnotation: returns whether if the **EventBus** is restricted to annotation.
+### Delaying an event
 
-## How can I get the restricted class or annotation?
+> Delaying an event will delay all event methods expecting this event (as their parameter) by 
+> the specified milliseconds
 
-There are several methods that does that in the **EventBusOptions** class
+To make an event delayed, annotate the event class with **DelayedEvent** and specify the time in the
+parameter.
+To value specified will be measured as **milliseconds**
 
-1 - getRestrictedClass: gets the restricted class. If there aren't any, it would return null.
+### Getting the caller EventBus
 
-2 - getRestrictedAnnotation: gets the restricted annotation. If there aren't any, it would return null.
+In an event class, where it might be called, you can get the caller EventBus easily.
 
+Annotate a field with **CallerEventBus** in your event class.
 
-### How can I report bugs or errors?
+```java
+@CallerEventBus EventBus event_bus;
+```
 
-You can report bugs or errors at the <a href="https://github.com/BrokenEarthDev/EventBus/issues">issue tracker</a>
+When the event is called, the **event_bus** variable will be initialized to the caller EventBus
+
+### ListenerList
+
+ListenerList is useful for getting cancelled events, registered listeners, and the event annotation for an EventBus.
+
+```java
+public static final ListenerList LISTENER_LIST = new ListenerList(EVENT_BUS);
+```
+
+To get the cancelled events:
+
+```java
+List<Class<?>> cancelled = LISTENER_LIST.getCancelledEvents();
+```
+
+To get the registered listeners:
+
+```java
+List<Object> registered = LISTENER_LIST.getRegisteredListeners();
+```
+
+And to get the event annotation:
+
+```java
+Class<? extends Annotation> eventAnnotation = LISTENER_LIST.getEventAnnotation();
+```
+
+### ModifiableEventBus
+
+A **ModifiableEventBus** is an EventBus that can have its settings (such as its event annotations) modified by the **EventBusModifier**.
+The ModifiableEventBus inherits from the **EventBus**.
+
+To create an instance of **ModifiableEventBus**
+```java
+public static final ModifiableEventBus<Event> MODIFIABLE_EVENT_BUS = new ModifiableEventBus<>();
+```
+
+To modify a ModifiableEventBus, create an instance of the **EventBusModifier**
+```java
+public static final EventBusModifier MODIFIER = new EventBusModifier(MODIFIABLE_EVENT_BUS); 
+```
+
+To check if an **EventBus** is modifiable:
+
+```java
+boolean isModifiable = EVENT_BUS.isModifiable();
+```
+
+If it returns true, you are safe to use:
+
+```java
+ModifiableEventBus<Event> casted = (ModifiableEventBus<Event>) EVENT_BUS;
+```
+
+## Planned Features:
+
+<ul>
+    <li>Use consumers as event listeners, too</li>
+    <li>EventBusAction, which can be queued and have a consumer specified,
+    that consumer will be called when a certain action is done such as registering</li>
+</ul>
